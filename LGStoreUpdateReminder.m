@@ -1,8 +1,7 @@
 //
 //  LGUpdateReminder.m
-//  mobiradars
 //
-//  Created by Lionel on 10/10/12.
+//  Created by y0n3l on 10/10/12.
 //
 //
 
