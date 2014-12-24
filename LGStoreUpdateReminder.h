@@ -8,8 +8,8 @@
 #import <Foundation/Foundation.h>
 
 @interface LGStoreUpdateReminder : NSObject {
-    NSInteger applicationStoreAppleId;
-    NSString* applicationStoreName;
+    NSInteger _applicationStoreAppleId;
+    NSString* _applicationStoreName;
     NSString* ignoredVersion;
     NSMutableData* iTunesLookupData;
     NSString* appstoreVersionNumber;

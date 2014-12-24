@@ -7,7 +7,7 @@
 
 #import "LGStoreUpdateReminder.h"
 #import <Foundation/Foundation.h>
-#import "JSONKit.h"
+
 
 #define kIgnoredVersionKey @"kIgnoredVersionKey"
 
@@ -19,7 +19,20 @@
 
 @implementation LGStoreUpdateReminder
 
-@synthesize applicationStoreAppleId;
+@synthesize applicationStoreAppleId = _applicationStoreAppleId;
+@synthesize applicationStoreName = _applicationStoreName;
+
+-(void) dealloc {
+    [_applicationStoreName release];
+    _applicationStoreName = nil;
+    [ignoredVersion release];
+    ignoredVersion = nil;
+    [iTunesLookupData release];
+    iTunesLookupData = nil;
+    [appstoreVersionNumber release];
+    appstoreVersionNumber = nil;
+    [super dealloc];
+}
 
 -(NSString*) bundleVersion {
 	return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
@@ -34,9 +47,9 @@
     [[NSUserDefaults standardUserDefaults] synchronize];
 }
 
--(void) checkForUpdate {
-    NSAssert(applicationStoreAppleId!=0 || applicationStoreName==nil, @"You must set the applicationAppleId before checking for update");
-    NSString* s = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%d&country=FR", applicationStoreAppleId];
+-(void) checkForAvailableUpdateOnAppStore {
+    NSAssert(_applicationStoreAppleId!=0 || _applicationStoreName==nil, @"You must set the applicationAppleId before checking for update");
+    NSString* s = [NSString stringWithFormat:@"http://itunes.apple.com/lookup?id=%ld&country=FR", (long)_applicationStoreAppleId];
     NSURLRequest* req = [[NSURLRequest alloc] initWithURL:[NSURL URLWithString:s]];
     NSURLConnection* conn = [[NSURLConnection alloc] initWithRequest:req delegate:self];
     NSLog(@"[APPDELEGATE] check update at %@", s);
@@ -52,7 +65,7 @@
 
 -(void) connectionDidFinishLoading:(NSURLConnection*)conn {
     if (iTunesLookupData) {
-        NSDictionary* json = [iTunesLookupData objectFromJSONData];
+        NSDictionary* json = [NSJSONSerialization JSONObjectWithData:iTunesLookupData options:0 error:nil];
         //NSLog(@"app props : %@", json);
         NSArray* results = [json objectForKey:@"results"];
         if ([results count]>0) {
@@ -76,7 +89,7 @@
     switch (buttonIndex) {
         case 0: {
             //update the app => go to the appstore
-            NSURL*url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"itms-apps://itunes.apple.com/fr/app/%@/id%d?mt=8&uo=4", applicationStoreName, applicationStoreAppleId]];
+            NSURL*url = [[NSURL alloc] initWithString:[NSString stringWithFormat:@"itms-apps://itunes.apple.com/fr/app/%@/id%ld?mt=8&uo=4", _applicationStoreName, (long)_applicationStoreAppleId]];
             [[UIApplication sharedApplication ]openURL:url];
             [url release];
             break;
